@@ -29,12 +29,30 @@ func (bu baseUsecase) GetData(ctx context.Context, id uint) (Domain, error) {
 	}
 	return res, nil
 }
+func (bu baseUsecase) GetDataWithoutConcurrency(ctx context.Context, id uint) (Domain, error) {
+	if id == 0 {
+		return Domain{}, errors.New("ID Empty")
+	}
+
+	res, err := bu.repo.GetDataWithoutConcurrency(ctx, id)
+	if err != nil {
+		return Domain{}, err
+	}
+	return res, nil
+}
 func (bu baseUsecase) GetAllData(ctx context.Context) ([]Domain, error) {
 	res, err := bu.repo.GetAllData(ctx)
 	if err != nil {
 		return []Domain{}, err
 	}
 	return res, nil
+}
+func (bu baseUsecase) GetPageVisitGraph(ctx context.Context) ([]string, []int32, error) {
+	title, data, err := bu.repo.GetPageVisitGraph(ctx)
+	if err != nil {
+		return []string{}, []int32{}, err
+	}
+	return title, data, nil
 }
 
 // func (bu baseUsecase) BuyProduct(ctx context.Context, domain Domain) (Domain, error) {

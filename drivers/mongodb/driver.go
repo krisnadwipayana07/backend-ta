@@ -18,6 +18,6 @@ func (config *ConfigDB) InitialDB() *mongo.Collection {
 		log.Fatal(err)
 	}
 
-	coll := client.Database("transactional").Collection("activity")
+	coll := client.Database("olap").Collection("product-visit")
 	return coll
 }

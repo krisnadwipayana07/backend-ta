@@ -5,8 +5,12 @@ import (
 	"net/http"
 	"snatia/app/routes"
 	BaseUsecase "snatia/business/base"
+	TransactionUsecase "snatia/business/transaction"
 	BaseController "snatia/controllers/base"
+	TransactionController "snatia/controllers/transaction"
 	BaseRepo "snatia/drivers/database/base"
+	TransactionRepo "snatia/drivers/database/transaction"
+	UserRepo "snatia/drivers/database/user"
 	"snatia/drivers/mongodb"
 	"snatia/drivers/mysql"
 	"time"
@@ -37,6 +41,9 @@ type User struct {
 
 func dbMigrate(db *gorm.DB) {
 	db.AutoMigrate(&BaseRepo.Products{})
+	db.AutoMigrate(&UserRepo.User{})
+	db.AutoMigrate(&TransactionRepo.Transaction{})
+	db.AutoMigrate(&TransactionRepo.TransactionDetail{})
 }
 
 func startMongo() {
@@ -54,15 +61,12 @@ func main() {
 	db := configDb.InitialDB()
 	dbMigrate(db)
 
-	analytics := viper.GetBool("analytics")
 	var mong *mongo.Collection
 
-	if analytics {
-		configMongo := mongodb.ConfigDB{
-			MongoURL: viper.GetString("database.mongodb.url"),
-		}
-		mong = configMongo.InitialDB()
+	configMongo := mongodb.ConfigDB{
+		MongoURL: viper.GetString("database.mongodb.url"),
 	}
+	mong = configMongo.InitialDB()
 
 	timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
 	e := echo.New()
@@ -77,8 +81,13 @@ func main() {
 	BaseUsecaseInterface := BaseUsecase.NewBaseUsecase(timeoutContext, BaseRepoInterface)
 	BaseControllerInterface := BaseController.NewBaseController(BaseUsecaseInterface)
 
+	TransactionInterface := TransactionRepo.NewMysqlTransactionRepository(db)
+	TransactionUsecaseInterface := TransactionUsecase.NewTransactionUsecase(timeoutContext, TransactionInterface)
+	TransactionControllerInterface := TransactionController.NewTransactionController(TransactionUsecaseInterface)
+
 	routesInit := routes.RouterControllerList{
-		BaseController: *BaseControllerInterface,
+		BaseController:        *BaseControllerInterface,
+		TransactionController: *TransactionControllerInterface,
 	}
 
 	routesInit.RouteRegister(e)

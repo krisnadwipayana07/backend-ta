@@ -5,7 +5,7 @@
     "address": ":8080"
   },
   "context": {
-    "timeout": 2
+    "timeout": 3
   },
   "database": {
     "mysql": {
@@ -13,7 +13,7 @@
       "port": "3306",
       "user": "root",
       "pass": "",
-      "name": "olap"
+      "name": "restaurant"
     },
     "mongodb": {
       "url": "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false"

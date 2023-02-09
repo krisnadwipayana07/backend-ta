@@ -9,7 +9,10 @@ import (
 
 type Products struct {
 	gorm.Model
-	Product string
+	Product     string
+	Price       uint
+	Pic         string
+	Description string
 }
 
 type Activity struct {
@@ -19,8 +22,11 @@ type Activity struct {
 
 func (product Products) ToDomain() base.Domain {
 	return base.Domain{
-		Product: product.Product,
-		Model:   product.Model,
+		Product:     product.Product,
+		Model:       product.Model,
+		Pic:         product.Pic,
+		Price:       product.Price,
+		Description: product.Description,
 	}
 }
 

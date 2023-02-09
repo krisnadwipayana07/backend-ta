@@ -8,3 +8,15 @@ type ProductResponse struct {
 	CreateAt time.Time `json:"createAt`
 	UpdateAt time.Time `json:"updateAt`
 }
+
+type GraphSales struct {
+	Label []string `json:"label"`
+	Data  []int32  `json:"data"`
+}
+
+func FromLabelString(label []string, data []int32) GraphSales {
+	return GraphSales{
+		Label: label,
+		Data:  data,
+	}
+}
