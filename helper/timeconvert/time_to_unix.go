@@ -1,13 +1,12 @@
 package timeconvert
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 )
 
 func UnixTimestampConvert(UnixTime string) time.Time {
-	fmt.Println(UnixTime)
+	// fmt.Println(UnixTime)
 	i, err := strconv.ParseInt(UnixTime, 10, 64)
 	if err != nil {
 		panic(err)

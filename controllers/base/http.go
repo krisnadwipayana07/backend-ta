@@ -5,6 +5,7 @@ import (
 	"snatia/business/base"
 	"snatia/controllers"
 	"snatia/controllers/base/response"
+	"snatia/helper/timeconvert"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -69,8 +70,13 @@ func (ctrl BaseController) GetDataWithoutConcurrency(c echo.Context) error {
 
 func (ctrl BaseController) GetPageVisitGraph(c echo.Context) error {
 	ctx := c.Request().Context()
+	startDateTemp := c.QueryParam("dateStart")
+	endDateTemp := c.QueryParam("dateEnd")
 
-	label, data, err := ctrl.baseUsecase.GetPageVisitGraph(ctx)
+	startDate := timeconvert.UnixTimestampConvert(startDateTemp)
+	endDate := timeconvert.UnixTimestampConvert(endDateTemp)
+
+	label, data, err := ctrl.baseUsecase.GetPageVisitGraph(ctx, startDate, endDate)
 
 	if err != nil {
 		return controllers.ErrorResponse(c, http.StatusInternalServerError, err)

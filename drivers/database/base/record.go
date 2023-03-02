@@ -44,3 +44,10 @@ func ToDomainList(product []Products) []base.Domain {
 	}
 	return list
 }
+
+func (product Products) ToActivity() Activity {
+	return Activity{
+		Product: product.Product,
+		Date:    time.Now(),
+	}
+}

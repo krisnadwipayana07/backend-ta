@@ -25,6 +25,14 @@ func NewMysqlBaseRepository(db *gorm.DB, mong *mongo.Collection) base.Repository
 	}
 }
 
+func (rep *MysqlBaseRepository) AnalyticsOLAP(ctx context.Context, insertData Activity) {
+	_, err := rep.Coll.InsertOne(ctx, insertData)
+	if err != nil {
+		log.Println(err)
+	}
+
+}
+
 func (rep *MysqlBaseRepository) GetData(ctx context.Context, id uint) (base.Domain, error) {
 	newProduct := Products{}
 
@@ -32,17 +40,13 @@ func (rep *MysqlBaseRepository) GetData(ctx context.Context, id uint) (base.Doma
 	if result.RowsAffected == 0 {
 		return base.Domain{}, errors.New("Product Not Found")
 	}
+
 	analytics := viper.GetBool("analytics")
-	newCtx := context.Background()
+
 	if analytics {
-		go func() {
-			insertData := Activity{Product: newProduct.Product, Date: time.Now()}
-			res, err := rep.Coll.InsertOne(newCtx, insertData)
-			log.Println(res)
-			if err != nil {
-				log.Println(err)
-			}
-		}()
+		newCtx := context.Background()
+		insertData := newProduct.ToActivity()
+		go rep.AnalyticsOLAP(newCtx, insertData)
 	}
 
 	return newProduct.ToDomain(), nil
@@ -54,9 +58,10 @@ func (rep *MysqlBaseRepository) GetDataWithoutConcurrency(ctx context.Context, i
 	if result.RowsAffected == 0 {
 		return base.Domain{}, errors.New("Product Not Found")
 	}
+
 	analytics := viper.GetBool("analytics")
 	if analytics {
-		insertData := Activity{Product: newProduct.Product, Date: time.Now()}
+		insertData := newProduct.ToActivity()
 		_, err := rep.Coll.InsertOne(ctx, insertData)
 		if err != nil {
 			return base.Domain{}, err
@@ -79,15 +84,24 @@ func (rep *MysqlBaseRepository) GetAllData(ctx context.Context) ([]base.Domain, 
 	res := ToDomainList(allData)
 	return res, nil
 }
-func (rep *MysqlBaseRepository) GetPageVisitGraph(ctx context.Context) ([]string, []int32, error) {
+func (rep *MysqlBaseRepository) GetPageVisitGraph(ctx context.Context, startDate time.Time, endDate time.Time) ([]string, []int32, error) {
 	// var allData []Activity
+	// start := primitive.NewObjectIDFromTimestamp(startDate)
+	// end := primitive.NewObjectIDFromTimestamp(endDate)
 
+	// groupStage := bson.D{{"$group", bson.D{
+	// 	{"_id", bson.D{{"product", "$product"}, {"date", "$product"}}},
+	// 	{"count", bson.D{{"$sum", 1}}},
+	// }}}
 	groupStage := bson.D{{"$group", bson.D{
 		{"_id", "$product"},
 		{"count", bson.D{{"$sum", 1}}},
 	}}}
 	// matchDate := bson.D{{"$match", bson.D{
-	// 	{"date", bson.D{{"$lt"}}}
+	// 	{"date", bson.D{
+	// 		{"$gte", primitive.NewObjectIDFromTimestamp(startDate)},
+	// 		{"$lte", primitive.NewObjectIDFromTimestamp(endDate)},
+	// 	}},
 	// }}}
 
 	result, err := rep.Coll.Aggregate(context.TODO(), mongo.Pipeline{groupStage})
@@ -98,6 +112,9 @@ func (rep *MysqlBaseRepository) GetPageVisitGraph(ctx context.Context) ([]string
 	if err = result.All(context.TODO(), &results); err != nil {
 		panic(err)
 	}
+	log.Println(startDate)
+	log.Println(endDate)
+	log.Println(results)
 
 	var label []string
 	var value []int32

@@ -47,8 +47,8 @@ func (bu baseUsecase) GetAllData(ctx context.Context) ([]Domain, error) {
 	}
 	return res, nil
 }
-func (bu baseUsecase) GetPageVisitGraph(ctx context.Context) ([]string, []int32, error) {
-	title, data, err := bu.repo.GetPageVisitGraph(ctx)
+func (bu baseUsecase) GetPageVisitGraph(ctx context.Context, startDate time.Time, endDate time.Time) ([]string, []int32, error) {
+	title, data, err := bu.repo.GetPageVisitGraph(ctx, startDate, endDate)
 	if err != nil {
 		return []string{}, []int32{}, err
 	}
