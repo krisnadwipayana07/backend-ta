@@ -41,6 +41,7 @@ type User struct {
 
 func dbMigrate(db *gorm.DB) {
 	db.AutoMigrate(&BaseRepo.Products{})
+	db.AutoMigrate(&BaseRepo.Activitys{})
 	db.AutoMigrate(&UserRepo.User{})
 	db.AutoMigrate(&TransactionRepo.Transaction{})
 	db.AutoMigrate(&TransactionRepo.TransactionDetail{})

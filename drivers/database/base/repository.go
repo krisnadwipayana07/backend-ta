@@ -51,6 +51,23 @@ func (rep *MysqlBaseRepository) GetData(ctx context.Context, id uint) (base.Doma
 
 	return newProduct.ToDomain(), nil
 }
+func (rep *MysqlBaseRepository) GetDataOLTP(ctx context.Context, id uint) (base.Domain, error) {
+	newProduct := Products{}
+
+	result := rep.DB.Table("products").Where("id = ?", id).Scan(&newProduct)
+	if result.RowsAffected == 0 {
+		return base.Domain{}, errors.New("Product Not Found")
+	}
+
+	analytics := viper.GetBool("analytics")
+
+	if analytics {
+		insertData := newProduct.ToActivitys()
+		rep.DB.Create(&insertData)
+	}
+
+	return newProduct.ToDomain(), nil
+}
 func (rep *MysqlBaseRepository) GetDataWithoutConcurrency(ctx context.Context, id uint) (base.Domain, error) {
 	newProduct := Products{}
 
@@ -127,6 +144,24 @@ func (rep *MysqlBaseRepository) GetPageVisitGraph(ctx context.Context, startDate
 		value = append(value, item["count"].(int32))
 	}
 	return label, value, nil
+}
+func (rep *MysqlBaseRepository) GetPageVisitGraphOLTP(ctx context.Context, startDate time.Time, endDate time.Time) ([]string, []int32, error) {
+	var activities []Activity
+	result := rep.DB.Select("count (product_id) as id").Joins("Product").Group("product_id").Table("product-visit").Find(&activities)
+	log.Println(allData[1])
+
+	if result.Error != nil {
+		return []string{}, []int32{}, errors.New("Get All Data Error")
+	}
+	if result.RowsAffected == 0 {
+		return []string{}, []int32{}, errors.New("Transaction Empty")
+	}
+
+	// for _, item := range allData {
+	// 	label = append(label, item.Product.Product)
+	// 	value = append(value, item.Qty)
+	// }
+	return []string{}, []int32{}, nil
 }
 
 // func (rep *MysqlBaseRepository) BuyProduct(ctx context.Context, domain base.Domain) (base.Domain, error) {

@@ -19,6 +19,13 @@ type Activity struct {
 	Product string
 	Date    time.Time
 }
+type Activitys struct {
+	gorm.Model
+	ProductID uint
+	Date      time.Time
+
+	Product Products `gorm:"foreignKey:ProductID"`
+}
 
 func (product Products) ToDomain() base.Domain {
 	return base.Domain{
@@ -49,5 +56,11 @@ func (product Products) ToActivity() Activity {
 	return Activity{
 		Product: product.Product,
 		Date:    time.Now(),
+	}
+}
+func (product Products) ToActivitys() Activitys {
+	return Activitys{
+		ProductID: product.ID,
+		Date:      time.Now(),
 	}
 }

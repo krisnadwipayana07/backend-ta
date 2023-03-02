@@ -50,6 +50,23 @@ func (ctrl BaseController) GetData(c echo.Context) error {
 
 	return controllers.SuccessResponse(c, data)
 }
+func (ctrl BaseController) GetDataOLTP(c echo.Context) error {
+	sId := c.Param("id")
+	ctx := c.Request().Context()
+
+	id, err := strconv.ParseUint(sId, 10, 64)
+	if err != nil {
+		return controllers.ErrorResponse(c, http.StatusInternalServerError, err)
+	}
+
+	data, err := ctrl.baseUsecase.GetDataOLTP(ctx, uint(id))
+
+	if err != nil {
+		return controllers.ErrorResponse(c, http.StatusInternalServerError, err)
+	}
+
+	return controllers.SuccessResponse(c, data)
+}
 func (ctrl BaseController) GetDataWithoutConcurrency(c echo.Context) error {
 	sId := c.Param("id")
 	ctx := c.Request().Context()
@@ -77,6 +94,23 @@ func (ctrl BaseController) GetPageVisitGraph(c echo.Context) error {
 	endDate := timeconvert.UnixTimestampConvert(endDateTemp)
 
 	label, data, err := ctrl.baseUsecase.GetPageVisitGraph(ctx, startDate, endDate)
+
+	if err != nil {
+		return controllers.ErrorResponse(c, http.StatusInternalServerError, err)
+	}
+
+	return controllers.SuccessResponse(c, response.FromLabelString(label, data))
+}
+
+func (ctrl BaseController) GetPageVisitGraphOLTP(c echo.Context) error {
+	ctx := c.Request().Context()
+	startDateTemp := c.QueryParam("dateStart")
+	endDateTemp := c.QueryParam("dateEnd")
+
+	startDate := timeconvert.UnixTimestampConvert(startDateTemp)
+	endDate := timeconvert.UnixTimestampConvert(endDateTemp)
+
+	label, data, err := ctrl.baseUsecase.GetPageVisitGraphOLTP(ctx, startDate, endDate)
 
 	if err != nil {
 		return controllers.ErrorResponse(c, http.StatusInternalServerError, err)

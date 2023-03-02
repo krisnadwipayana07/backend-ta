@@ -29,6 +29,17 @@ func (bu baseUsecase) GetData(ctx context.Context, id uint) (Domain, error) {
 	}
 	return res, nil
 }
+func (bu baseUsecase) GetDataOLTP(ctx context.Context, id uint) (Domain, error) {
+	if id == 0 {
+		return Domain{}, errors.New("ID Empty")
+	}
+
+	res, err := bu.repo.GetDataOLTP(ctx, id)
+	if err != nil {
+		return Domain{}, err
+	}
+	return res, nil
+}
 func (bu baseUsecase) GetDataWithoutConcurrency(ctx context.Context, id uint) (Domain, error) {
 	if id == 0 {
 		return Domain{}, errors.New("ID Empty")
@@ -49,6 +60,13 @@ func (bu baseUsecase) GetAllData(ctx context.Context) ([]Domain, error) {
 }
 func (bu baseUsecase) GetPageVisitGraph(ctx context.Context, startDate time.Time, endDate time.Time) ([]string, []int32, error) {
 	title, data, err := bu.repo.GetPageVisitGraph(ctx, startDate, endDate)
+	if err != nil {
+		return []string{}, []int32{}, err
+	}
+	return title, data, nil
+}
+func (bu baseUsecase) GetPageVisitGraphOLTP(ctx context.Context, startDate time.Time, endDate time.Time) ([]string, []int32, error) {
+	title, data, err := bu.repo.GetPageVisitGraphOLTP(ctx, startDate, endDate)
 	if err != nil {
 		return []string{}, []int32{}, err
 	}

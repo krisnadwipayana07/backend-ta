@@ -23,6 +23,7 @@ func (ctrl RouterControllerList) RouteRegister(e *echo.Echo) {
 
 	e.GET("/getData", ctrl.BaseController.GetAll)
 	e.GET("/getData/:id", ctrl.BaseController.GetData)
+	e.GET("/getData-oltp/:id", ctrl.BaseController.GetDataOLTP)
 	e.GET("/getDataWithoutConcurrency/:id", ctrl.BaseController.GetDataWithoutConcurrency)
 
 	admin := e.Group("/admin")
@@ -31,6 +32,7 @@ func (ctrl RouterControllerList) RouteRegister(e *echo.Echo) {
 	admin.GET("/graph/sales/by-day", ctrl.TransactionController.GetSalesByDay)
 	admin.GET("/graph/product", ctrl.TransactionController.GetProductSales)
 	admin.GET("/graph/product-visit", ctrl.BaseController.GetPageVisitGraph)
+	admin.GET("/graph/product-visit-oltp", ctrl.BaseController.GetPageVisitGraphOLTP)
 
 	admin.GET("/transaction", ctrl.TransactionController.GetAll)
 	admin.POST("/transaction/add", ctrl.TransactionController.AddTransaction)
